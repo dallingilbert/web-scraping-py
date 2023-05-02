@@ -11,6 +11,42 @@ from webdriver_manager.chrome import ChromeDriverManager
 driver = webdriver.Chrome(service=ChromeService(
     ChromeDriverManager().install()))
 
+# function for looping through opportunity links
+
+
+def loop_opp_links(page_res):
+    tbody = page_res.find_element(By.TAG_NAME, "tbody")
+
+    # extract the opportunity number
+    trow = tbody.find_elements(By.TAG_NAME, "tr")
+    for row in trow[1:]:
+        try:
+            # navigate to opportunity link webpage
+            opp_link = row.find_element(By.TAG_NAME, "a")
+            print(opp_link.text)
+            # opp_link.click()
+
+            # select the div with info synopsis
+            # synopsis_content = WebDriverWait(driver, 60).until(
+            #     EC.presence_of_element_located(
+            #         (By.ID, "synopsisDetailsContent"))
+            # )
+
+            # seperate content by fieldsets
+            # fieldset = synopsis_content.find_elements(By.TAG_NAME, "fieldset")
+
+            # print(fieldset)
+
+            # table body
+            # t_body = fieldset[0].find_element(By.TAG_NAME, "tbody")
+
+            # navigate back to the home page
+            # driver.back()
+
+        except exceptions.StaleElementReferenceException as e:
+            print(e)
+
+
 # specify the URL of the website to scrape
 url = 'https://www.grants.gov/custom/search.jsp'
 
@@ -38,43 +74,10 @@ try:
     search_results = WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.CLASS_NAME, "grid")))
 
-    tbody = search_results.find_element(By.TAG_NAME, "tbody")
+    # loop through table for opportunity links
+    loop_opp_links(search_results)
 
-    # split the tbody into tables of data
-    table_even = tbody.find_elements(By.CLASS_NAME, "gridevenrow")
-    table_odd = tbody.find_elements(By.CLASS_NAME, "gridoddrow")
-
-    # combine even and odd rows
-    data = table_even + table_odd
-
-    # extract the opportunity number
     opp_list = []
 
-    for d in data:
-        try:
-            opp_link = d.find_element(By.TAG_NAME, "a")
-            # navigate to opportunity link webpage
-            opp_link.click()
-            # select the div with info synopsis
-            synopsis_content = WebDriverWait(driver, 60).until(
-                EC.presence_of_element_located(
-                    (By.ID, "synopsisDetailsContent"))
-            )
-
-            # seperate content by fieldsets
-            fieldset = synopsis_content.find_elements(By.TAG_NAME, "fieldset")
-
-            print(fieldset)
-
-            # table body
-            t_body = fieldset[0].find_element(By.TAG_NAME, "tbody")
-
-            # navigate back to the home page
-            driver.back()
-
-        except exceptions.StaleElementReferenceException as e:
-            print(e)
-
-        # opp_list.append(opportunity_link.text)
 finally:
     driver.quit()
