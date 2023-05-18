@@ -26,6 +26,12 @@ driver.get(url)
 # maximize browser window
 driver.maximize_window()
 
+# function to handle navigation between numbered pages
+
+
+def navigate_next_page():
+    pass
+
 # function to handle exporting our scraped data to an excel file
 
 
@@ -94,33 +100,52 @@ def perform_search(criteria):
 
 
 def loop_links(results, list):
-    tbody = results.find_element(By.TAG_NAME, "tbody")
 
-    # extract the opportunity number
-    trow = tbody.find_elements(By.TAG_NAME, "tr")
+    wait = WebDriverWait(driver, 30)
 
-    # skips the first table row and loops opp_links
-    for row in trow[1:]:
-        try:
-            # navigate to opportunity link webpage
-            opp_link = WebDriverWait(driver, 30).until(
-                EC.element_to_be_clickable(row.find_element(By.TAG_NAME, "a")))
+    # loop through each page
+    for x in range(2):
+        if x == 1:
+            try:
+                tbody = results.find_element(By.TAG_NAME, "tbody")
+            except exceptions.StaleElementReferenceException:
+                tbody = wait.until(
+                    EC.presence_of_element_located((By.TAG_NAME, "tbody")))
+        else:
+            tbody = wait.until(
+                EC.presence_of_element_located((By.CLASS_NAME, "grid")))
 
-        except exceptions.StaleElementReferenceException as e:
-            print(e)
+        trow = tbody.find_elements(By.TAG_NAME, "tr")
 
-        # click opportunity link
-        opp_link.click()
+        # Get the page navigation element
+        page_nav = driver.find_element(By.CLASS_NAME, "grid-pagination")
 
-        time.sleep(0.75)
+        # Get the next a tag element
+        a_next = page_nav.find_element(By.LINK_TEXT, "Next »")
 
-        # scrape page
-        scrape_grant_opp(list)
+        # skips the first table row and loops opp_links
+        for row in trow[1:]:
+            try:
+                # navigate to opportunity link webpage
+                opp_link = wait.until(EC.element_to_be_clickable(
+                    row.find_element(By.TAG_NAME, "a")))
 
-        # navigate back to the home page
-        driver.back()
+            except exceptions.StaleElementReferenceException as e:
+                print(e)
 
-        # time.sleep(1)
+            # click opportunity link
+            opp_link.click()
+
+            time.sleep(1)
+
+            # scrape page
+            scrape_grant_opp(list)
+
+            # navigate back to the home page
+            driver.back()
+
+        a_next.click()
+        time.sleep(3)
 
 
 # wait for the dynamic content to load
