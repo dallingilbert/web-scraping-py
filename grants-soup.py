@@ -43,14 +43,8 @@ def export_to_excel(data):
 
 
 def scrape_grant_opp(list):
-    # select the div with info synopsis
-    synopsis_content = WebDriverWait(driver, 30).until(
-        EC.visibility_of_all_elements_located(
-            (By.ID, "synopsisDetailsContent"))
-    )
-
     # seperate page content by fieldsets
-    g_fieldset = synopsis_content[0].find_elements(By.TAG_NAME, "fieldset")
+    g_fieldset = driver.find_elements(By.TAG_NAME, "fieldset")
 
     # table row general
     tr_general = g_fieldset[0].find_element(By.TAG_NAME, "tr")
@@ -117,6 +111,8 @@ def loop_links(results, list):
 
         # click opportunity link
         opp_link.click()
+
+        time.sleep(0.75)
 
         # scrape page
         scrape_grant_opp(list)
