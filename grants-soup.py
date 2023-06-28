@@ -99,21 +99,22 @@ def perform_search(criteria):
 # function for looping through opportunity links
 
 
-def loop_links(results, list):
+def loop_links(list):
 
     wait = WebDriverWait(driver, 30)
 
     # loop through each page
-    for x in range(2):
-        if x == 1:
-            try:
-                tbody = results.find_element(By.TAG_NAME, "tbody")
-            except exceptions.StaleElementReferenceException:
-                tbody = wait.until(
-                    EC.presence_of_element_located((By.TAG_NAME, "tbody")))
-        else:
+    for x in range(10):
+
+        # grab info from main table
+        search_results = WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "grid")))
+
+        try:
+            tbody = search_results.find_element(By.TAG_NAME, "tbody")
+        except exceptions.StaleElementReferenceException:
             tbody = wait.until(
-                EC.presence_of_element_located((By.CLASS_NAME, "grid")))
+                EC.presence_of_element_located((By.TAG_NAME, "tbody")))
 
         trow = tbody.find_elements(By.TAG_NAME, "tr")
 
@@ -136,7 +137,7 @@ def loop_links(results, list):
             # click opportunity link
             opp_link.click()
 
-            time.sleep(1)
+            time.sleep(2)
 
             # scrape page
             scrape_grant_opp(list)
@@ -144,7 +145,9 @@ def loop_links(results, list):
             # navigate back to the home page
             driver.back()
 
-        a_next.click()
+        if (x != 10):
+            a_next.click()
+
         time.sleep(3)
 
 
@@ -153,15 +156,11 @@ try:
     # search technology field
     perform_search("technology")
 
-    # grab info from main table
-    search_results = WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "grid")))
-
     # create opportunity list
     tspan_list = []
 
     # loop through table for opportunity links
-    loop_links(search_results, tspan_list)
+    loop_links(tspan_list)
 
     # Call the export_to_excel function to export the scraped data
     export_to_excel(tspan_list)
