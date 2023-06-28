@@ -1,0 +1,14 @@
+{
+  "name": "javascript-scraping",
+  "version": "1.0.0",
+  "description": "A javascript file created to scrape businesses in idaho and utah, will utilize the puppeteer library to access local business registries. After we retrieve business information, we will look at google maps to find any remaining data that is missing from the first source.",
+  "main": "scraper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dallin Gilbert",
+  "license": "ISC",
+  "dependencies": {
+    "puppeteer": "^20.7.3"
+  }
+}
