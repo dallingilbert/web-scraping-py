@@ -2,8 +2,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common import exceptions
-from selenium.webdriver import ActionChains
-from selenium.webdriver.common.keys import Keys
 
 import pandas as pd
 
@@ -25,12 +23,6 @@ driver.get(url)
 
 # maximize browser window
 driver.maximize_window()
-
-# function to handle navigation between numbered pages
-
-
-def navigate_next_page():
-    pass
 
 # function to handle exporting our scraped data to an excel file
 
@@ -99,22 +91,21 @@ def perform_search(criteria):
 # function for looping through opportunity links
 
 
-def loop_links(list):
+def loop_links(results, list):
 
     wait = WebDriverWait(driver, 30)
 
     # loop through each page
-    for x in range(10):
-
-        # grab info from main table
-        search_results = WebDriverWait(driver, 30).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "grid")))
-
-        try:
-            tbody = search_results.find_element(By.TAG_NAME, "tbody")
-        except exceptions.StaleElementReferenceException:
+    for x in range(2):
+        if x == 1:
+            try:
+                tbody = results.find_element(By.TAG_NAME, "tbody")
+            except exceptions.StaleElementReferenceException:
+                tbody = wait.until(
+                    EC.presence_of_element_located((By.TAG_NAME, "tbody")))
+        else:
             tbody = wait.until(
-                EC.presence_of_element_located((By.TAG_NAME, "tbody")))
+                EC.presence_of_element_located((By.CLASS_NAME, "grid")))
 
         trow = tbody.find_elements(By.TAG_NAME, "tr")
 
@@ -137,7 +128,7 @@ def loop_links(list):
             # click opportunity link
             opp_link.click()
 
-            time.sleep(2)
+            time.sleep(1)
 
             # scrape page
             scrape_grant_opp(list)
@@ -145,9 +136,7 @@ def loop_links(list):
             # navigate back to the home page
             driver.back()
 
-        if (x != 10):
-            a_next.click()
-
+        a_next.click()
         time.sleep(3)
 
 
@@ -156,11 +145,15 @@ try:
     # search technology field
     perform_search("technology")
 
+    # grab info from main table
+    search_results = WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "grid")))
+
     # create opportunity list
     tspan_list = []
 
     # loop through table for opportunity links
-    loop_links(tspan_list)
+    loop_links(search_results, tspan_list)
 
     # Call the export_to_excel function to export the scraped data
     export_to_excel(tspan_list)
